@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tank-game</title>
+    <style>
+        #map{
+            background-image: url("imgs/background.png");
+        }
+    </style>
+    <script src="tank_js.js"></script>
+</head>
+<body onkeydown="control();">
+    <p>上下左右wsad发射子弹sapce</p>
+    <canvas id="map" width="512px" height="480px"></canvas>
+</body>
+<script>
+    /*画布设置*/
+    var c = document.getElementById("map");
+    var cxt = c.getContext("2d");
+    /*初始化mine坦克*/
+    var mine_color = new Array("#e1e1e1","#a6a6a6");
+    var other_color = new Array("#00A2B5","#00FEFE");
+    var mine = new Mine_Tank(140,140,0,mine_color);  //mine tank
+    /*初始化other坦克*/
+    var other = new Array();  //other tank
+    /*设置other子弹对象*/
+    var otherbullets=new Array();
+    /*设置mine子弹对象*/
+    var minebullets=new Array();
+    /*定义一个炸弹数组*/
+    var bombs=new Array();
+
+    /*用for循环设置other坦克数量*/
+    for(var i = 0;i<8;i++){
+        /*传递other坦克的制作信息*/
+        var other_tank = new Other_Tank((i+1)*50,0,2,other_color);
+        other[i] = other_tank;
+        /*让other坦克跑起来*/
+        window.setInterval("other["+i+"].run()",50);
+        /*为other坦克的子弹描述射出路径*/
+        var bw=new Bullet(other[i].x+9,other[i].y+30,2,3,"other",other[i]);
+        otherbullets[i]=bw;  //添加子弹
+        /*让other坦克的子弹跑起来*/
+        var bb=window.setInterval("otherbullets["+i+"].run()",50);
+        otherbullets[i].timer=bb;
+    }
+    flashTankMap();
+
+    function flashTankMap() {
+        cxt.clearRect(0, 0, 512, 480); //清除留下之前的轨迹
+        DrawTank(mine); //绘制出mine坦克
+        for (var i = 0; i<8; i++) {
+            DrawTank(other[i]);  //绘制出other坦克
+        }
+        DrawMB(); //画出mine坦克的子弹
+        DrawOB(); //画出other坦克的子弹
+        HitOtherTank(); //判断击中目标
+        drawOtherBomb(); //爆炸特效
+    }
+    /*方向控制*/
+    function control() {
+        var key = event.keyCode;
+        switch (key) {
+            case 87:
+                mine.moveUp(); //w
+                break;
+            case 68:
+                mine.moveRight(); //d
+                break;
+            case 83:
+                mine.moveDown(); //s
+                break;
+            case 65:
+                mine.moveLeft(); //a
+                break;
+            case 32:
+                mine.shotother();
+                break;
+        }
+        flashTankMap();
+    }
+    window.setInterval("flashTankMap()",100);
+</script>
+</html>
